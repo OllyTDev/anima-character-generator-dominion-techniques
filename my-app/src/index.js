@@ -1,117 +1,193 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
+import 'bootstrap';
+import 'bootstrap/dist/css/bootstrap.css';
+import 'bootstrap/dist/js/bootstrap.js';
+import $ from 'jquery';
+import Popper from 'popper.js';
 
-  function Square(props) {
+class ProductCategoryRow extends React.Component {
+  render() {
+    const category = this.props.category;
     return (
-      <button className="square" onClick={props.onClick}>
-        {props.value}
-      </button>
+      <tr>
+        <th colSpan="2">
+          {category}
+        </th>
+      </tr>
     );
   }
-  
-  class Board extends React.Component {
-    constructor(props) {
-      super(props);
-      this.state = {
-        squares: Array(9).fill(null),
-        xIsNext: true,
-      };
-    }
+}
 
-    handleClick(i) {
-      const squares = this.state.squares.slice();
-      if (calculateWinner(squares || squares[i])){
-        return
+class ProductRow extends React.Component {
+  render() {
+    const product = this.props.product;
+    const name = product.stocked ?
+      product.name :
+      <span style={{color: 'red'}}>
+        {product.name}
+      </span>;
+
+    return (
+      <tr>
+        <td>{name}</td>
+        <td>{product.price}</td>
+      </tr>
+    );
+  }
+}
+
+class ProductTable extends React.Component {
+  render() {
+    const rows = [];
+    let lastCategory = null;
+    
+    this.props.products.forEach((product) => {
+      if (product.category !== lastCategory) {
+        rows.push(
+          <ProductCategoryRow
+            category={product.category}
+            key={product.category} />
+        );
       }
-      squares[i] = this.state.xIsNext ? 'X' : 'O';
-      this.setState({
-        squares: squares,
-        xIsNext: !this.state.xIsNext,
-      })
-    }
-
-    renderSquare(i) {
-      return (
-        <Square 
-          value={this.state.squares[i]}
-          onClick={() => this.handleClick(i)}
-        />
+      rows.push(
+        <ProductRow
+          product={product}
+          key={product.name} />
       );
-    }
-  
-    render() {
-      const winner = calculateWinner(this.state.squares);
-      let status;
-      if (winner) {
-        status = 'Winner: ' + winner;
-      } else {
-        status = 'Next player: ' + (this.state.xIsNext ? 'X' : 'O');
-      }
-      
+      lastCategory = product.category;
+    });
+
+    return (
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Price</th>
+          </tr>
+        </thead>
+        <tbody>{rows}</tbody>
+      </table>
+    );
+  }
+}
+
+class SearchBar extends React.Component {
+  render() {
+    return (
+      <form>
+        <input type="text" placeholder="Search..." />
+        <p>
+          <input type="checkbox" />
+          {' '}
+          Only show products in stock
+        </p>
+      </form>
+    );
+  }
+}
+
+
+class FilterableProductTable extends React.Component {
+  render() {
+    return (
+      <div>
+        <SearchBar />
+        <ProductTable products={this.props.products} />
+      </div>
+    );
+  }
+}
+
+
+
+class Dropdown extends React.Component {
+  state = {
+    isOpen: false
+  };
+
+  toggleOpen = () => this.setState({ isOpen: !this.state.isOpen });
+
+  onClick(){
+    console.log("Clicked!");
+  }
+
+  render() {
+    const menuClass = `dropdown-menu${this.state.isOpen ? " show" : ""}`;
+    this.onClick()
+    return (
+      <div className="dropdown" onClick={this.toggleOpen}>
+        <button
+          className="btn btn-secondary dropdown-toggle"
+          type="button"
+          id="dropdownMenuButton"
+          data-toggle="dropdown"
+          aria-haspopup="true"
+        >
+          Dropdown
+        </button>
+        <div className={menuClass} aria-labelledby="dropdownMenuButton">
+          <a className="dropdown-item" href="#nogo">
+            Item 1
+          </a>
+          <a className="dropdown-item" href="#nogo">
+            Item 2
+          </a>
+          <a className="dropdown-item" href="#nogo">
+            Item 3
+          </a>
+        </div>
+      </div>
+    );
+  }
+}
+
+class TechniqueName extends React.Component {
+  render() {
+    return (
+      <form>
+        <input type="text" placeholder="Name" />
+      </form>
+    );
+  }
+}
+
+class TechniqueCreationTable extends React.Component {
+  render() {
+    return (
+      <div>
+        <TechniqueName />
+        <Dropdown />
+        <ProductTable products={this.props.products} />
+      </div>
+    );
+  }
+}
+
+
+const attackSingle = [
+  {Bonus: '+10', primary: 2, secondary: 4, MK: 5, Maintainance: 1, level: 1 },
+  {Bonus: '+25', primary: 3, secondary: 5, MK: 5, Maintainance: 2, level: 1 },
+  {Bonus: '+40', primary: 4, secondary: 6, MK: 10, Maintainance:3, level: 1 }
+];
+
+const Cateories = [
+  {categoryName: 'Offensive effects', effects: [['Attack (single)', attackSingle], ['Attack (Multiple)', attackSingle], ['Predetermined attack', attackSingle], ['Counter attack', attackSingle], ['Combat Maneuvers (Single)', attackSingle], ['Combat Maneuvers (Single)', attackSingle], ['Indirect attack', attackSingle], ['Camouflage attack', attackSingle]] }
+];
+
+
+
+const PRODUCTS = [
+  {category: 'Sporting Goods', price: '$49.99', stocked: true, name: 'Football'},
+  {category: 'Sporting Goods', price: '$9.99', stocked: true, name: 'Baseball'},
+  {category: 'Sporting Goods', price: '$29.99', stocked: false, name: 'Basketball'},
+  {category: 'Electronics', price: '$99.99', stocked: true, name: 'iPod Touch'},
+  {category: 'Electronics', price: '$399.99', stocked: false, name: 'iPhone 5'},
+  {category: 'Electronics', price: '$199.99', stocked: true, name: 'Nexus 7'}
+];
  
-      return (
-        <div>
-          <div className="status">{status}</div>
-          <div className="board-row">
-            {this.renderSquare(0)}
-            {this.renderSquare(1)}
-            {this.renderSquare(2)}
-          </div>
-          <div className="board-row">
-            {this.renderSquare(3)}
-            {this.renderSquare(4)}
-            {this.renderSquare(5)}
-          </div>
-          <div className="board-row">
-            {this.renderSquare(6)}
-            {this.renderSquare(7)}
-            {this.renderSquare(8)}
-          </div>
-        </div>
-      );
-    }
-  }
-  
-  class Game extends React.Component {
-    render() {
-      return (
-        <div className="game">
-          <div className="game-board">
-            <Board />
-          </div>
-          <div className="game-info">
-            <div>{/* status */}</div>
-            <ol>{/* TODO */}</ol>
-          </div>
-        </div>
-      );
-    }
-  }
-  
-  // ========================================
-  
-  ReactDOM.render(
-    <Game />,
-    document.getElementById('root')
-  );
-  
-  function calculateWinner(squares) {
-    const lines = [
-      [0, 1, 2],
-      [3, 4, 5],
-      [6, 7, 8],
-      [0, 3, 6],
-      [1, 4, 7],
-      [2, 5, 8],
-      [0, 4, 8],
-      [2, 4, 6],
-    ];
-    for (let i = 0; i < lines.length; i++) {
-      const [a, b, c] = lines[i];
-      if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
-        return squares[a];
-      }
-    }
-    return null;
-  }
+ReactDOM.render(
+  <TechniqueCreationTable products={PRODUCTS} />,
+  document.getElementById('container')
+);
