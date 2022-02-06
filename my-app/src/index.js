@@ -109,13 +109,8 @@ class Dropdown extends React.Component {
 
   toggleOpen = () => this.setState({ isOpen: !this.state.isOpen });
 
-  onClick(){
-    console.log("Clicked!");
-  }
-
   render() {
     const menuClass = `dropdown-menu${this.state.isOpen ? " show" : ""}`;
-    this.onClick()
     return (
       <div className="dropdown" onClick={this.toggleOpen}>
         <button
@@ -143,6 +138,48 @@ class Dropdown extends React.Component {
   }
 }
 
+class BasicDropdown extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {value: ''};
+
+    this.handleChange = this.handleChange.bind(this);
+  }
+
+  onTrigger = (event) => {
+    this.props.parentCallback(event.target.myname.value);
+    event.preventDefault();
+  }
+
+  handleChange(event) {
+    this.setState({value: event.target.value});
+    console.log("value: ", event.target.value)
+  }
+
+  render() {
+    var Cateories = [
+      {categoryName: 'Offensive effects', effects: [['Attack (single)', attackSingle], ['Attack (Multiple)', attackSingle], ['Predetermined attack', attackSingle], ['Counter attack', attackSingle], ['Combat Maneuvers (Single)', attackSingle], ['Combat Maneuvers (Single)', attackSingle], ['Indirect attack', attackSingle], ['Camouflage attack', attackSingle]] },
+      {categoryName: 'Defensive effects', effects: [['Attack (single)', attackSingle], ['Attack (Multiple)', attackSingle], ['Predetermined attack', attackSingle], ['Counter attack', attackSingle], ['Combat Maneuvers (Single)', attackSingle], ['Combat Maneuvers (Single)', attackSingle], ['Indirect attack', attackSingle], ['Camouflage attack', attackSingle]] }
+    ];
+
+    function MakeItem(categoryList) {
+      var newRows = []
+      console.log("categoryList.length is ", categoryList.length)
+      for (let i = 0; i < categoryList.length; i++) {
+        console.log("categoryList[i].categoryName is :", categoryList[i].categoryName);
+        newRows.push(<option key={categoryList[i].categoryName} value={categoryList[i].categoryName}>{categoryList[i].categoryName}</option>);
+      };
+      return newRows
+    };
+
+    return (
+      <select value={this.state.value} onChange={this.handleChange}>
+        {(MakeItem(Cateories))}
+      </select>
+    );
+  }
+}
+
 class TechniqueName extends React.Component {
   render() {
     return (
@@ -154,11 +191,18 @@ class TechniqueName extends React.Component {
 }
 
 class TechniqueCreationTable extends React.Component {
+  state = {
+    selectedCategory: "",
+    ability1: "",
+    ability2: ""
+   }
+
   render() {
+    const {name} = this.state;
     return (
       <div>
         <TechniqueName />
-        <Dropdown />
+        <BasicDropdown />
         <ProductTable products={this.props.products} />
       </div>
     );
